@@ -153,18 +153,18 @@ object Installer {
               exit 0
             fi
             SRC="$src"
-            [ -z "$SRC" ] && { echo "NO_SOURCE"; exit 2; }
+            [ -z "${'$'}SRC" ] && { echo "NO_SOURCE"; exit 2; }
             cd /tmp
-            case "$SRC" in
-              http*) curl -sL -o qq.pkg "$SRC" || { echo "下载失败"; exit 1; }; PKG=/tmp/qq.pkg ;;
-              *)     PKG=$SRC ;;
+            case "${'$'}SRC" in
+              http*) curl -sL -o qq.pkg "${'$'}SRC" || { echo "下载失败"; exit 1; }; PKG=/tmp/qq.pkg ;;
+              *)     PKG=${'$'}SRC ;;
             esac
             mkdir -p /opt
-            case "$PKG" in
-              *.deb)      dpkg -i "$PKG" 2>&1 | tail -3 || apt-get install -y -f 2>&1 | tail -3 ;;
-              *.tar.gz|*.tgz) tar xzf "$PKG" -C /opt ;;
-              *.tar.xz)   tar xJf "$PKG" -C /opt ;;
-              *)          echo "不认识的包格式: $PKG"; exit 1 ;;
+            case "${'$'}PKG" in
+              *.deb)      dpkg -i "${'$'}PKG" 2>&1 | tail -3 || apt-get install -y -f 2>&1 | tail -3 ;;
+              *.tar.gz|*.tgz) tar xzf "${'$'}PKG" -C /opt ;;
+              *.tar.xz)   tar xJf "${'$'}PKG" -C /opt ;;
+              *)          echo "不认识的包格式: ${'$'}PKG"; exit 1 ;;
             esac
             chmod +x /opt/QQ/qq /opt/QQ/chrome-sandbox 2>/dev/null
             echo "QQ: $(python3 -c "import json;print(json.load(open('/opt/QQ/resources/app/package.json'))['version'])" 2>/dev/null)"
