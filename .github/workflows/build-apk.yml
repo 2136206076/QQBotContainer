@@ -1,0 +1,47 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:      # 允许在 GitHub 网页上手动点「Run workflow」
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 准备 proot 二进制
+        run: python3 tools/fetch-proot.py
+
+      - name: 生成 gradle wrapper
+        run: |
+          if [ ! -f gradlew ]; then gradle wrapper --gradle-version 8.2 --distribution-type bin; fi
+          chmod +x gradlew
+
+      - name: 编译 debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: QQBotContainer-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: 同时挂到 Release（方便手机直接下载）
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
